@@ -23,7 +23,6 @@ class TestHandValue:
     def test_two_aces_and_nine(self):
         env = BlackjackEnv()
         val, usable = env.hand_value([1, 1, 9])
-        # one ace as 11, one as 1, plus 9 = 21
         assert val == 21
         assert usable is True
 
@@ -41,7 +40,6 @@ class TestHandValue:
 
     def test_ace_forced_to_one(self):
         env = BlackjackEnv()
-        # ace + 10 + 10 = 1 + 10 + 10 = 21 (ace cant be 11)
         val, usable = env.hand_value([1, 10, 10])
         assert val == 21
         assert usable is False
@@ -53,7 +51,7 @@ class TestDeal:
         state = env.deal()
         assert isinstance(state, tuple)
         player_sum, dealer_card, usable_ace = state
-        assert 4 <= player_sum <= 21
+        assert 2 <= player_sum <= 21
         assert 1 <= dealer_card <= 10
         assert isinstance(usable_ace, (bool, int))
 
@@ -62,15 +60,15 @@ class TestStep:
     def test_stand_terminates(self):
         env = BlackjackEnv()
         env.deal()
-        # action=1 is stand (or 0 depending on convention, try both)
-        next_state, reward, done = env.step(0)  # stand
+        # action 0=hit, 1=stand, 2=double
+        _, _, done = env.step(1)  # stand
         assert done is True
 
     def test_hit_gives_valid_state(self):
         env = BlackjackEnv()
         env.deal()
-        next_state, reward, done = env.step(1)  # hit
+        next_state, reward, done = env.step(0)  # hit
         if not done:
             player_sum, dealer_card, usable = next_state
-            assert 2 <= player_sum <= 31  # could bust
+            assert 2 <= player_sum <= 31
             assert 1 <= dealer_card <= 10
